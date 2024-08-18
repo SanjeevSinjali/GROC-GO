@@ -5,7 +5,15 @@
 package sem2work;
 
 import java.awt.Color;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.JOptionPane;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javax.swing.table.DefaultTableModel;
 import sem2work.First;
 
 /**
@@ -17,9 +25,12 @@ public class Stock extends javax.swing.JFrame {
     /**
      * Creates new form HomePage
      */
-    
-    public Stock() {
+    private int userId;
+
+    public Stock(int userid) {
+        this.userId = userid;
         initComponents();
+        populateTable();
     }
 
     /**
@@ -46,10 +57,10 @@ public class Stock extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
-        jButton6 = new javax.swing.JButton();
+        product_name_input = new javax.swing.JTextField();
+        product_quantity_input = new javax.swing.JTextField();
+        ppp_input = new javax.swing.JTextField();
+        add_stock_btn = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
 
@@ -68,10 +79,11 @@ public class Stock extends javax.swing.JFrame {
         setTitle("Dashboard");
         setResizable(false);
 
-        jPanel1.setBackground(new java.awt.Color(153, 153, 153));
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jLabel1.setFont(new java.awt.Font("MonoLisa Black", 0, 36)); // NOI18N
-        jLabel1.setText("GROC-GO");
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/sem2work/assests/GROC-GO Final Logo.jpg"))); // NOI18N
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jButton1.setText("Profile");
@@ -143,7 +155,7 @@ public class Stock extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 8, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jLabel1))
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -173,7 +185,7 @@ public class Stock extends javax.swing.JFrame {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 21, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -183,15 +195,14 @@ public class Stock extends javax.swing.JFrame {
         jTable1.setBorder(javax.swing.BorderFactory.createCompoundBorder());
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                { new Integer(1), "2pm noodle",  new Integer(20),  new Long(26)},
-                { new Integer(2), "Banana",  new Integer(12),  new Long(10)}
+
             },
             new String [] {
-                "Product Id", "Product Name", "Qty", "Price Per Unit"
+                "Product Id", "Product Name", "Price Per Unit", "Stock Qty"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.Long.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -199,40 +210,48 @@ public class Stock extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setResizable(false);
+        }
 
         jPanel5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jLabel2.setText("Product Name");
 
-        jLabel3.setText("Product Qty");
+        jLabel3.setText("Stock Qty");
 
         jLabel5.setText("Product Price Per Unit");
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        product_name_input.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                product_name_inputActionPerformed(evt);
             }
         });
 
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        product_quantity_input.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                product_quantity_inputActionPerformed(evt);
             }
         });
 
-        jTextField3.setToolTipText("");
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+        ppp_input.setToolTipText("");
+        ppp_input.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
+                ppp_inputActionPerformed(evt);
             }
         });
 
-        jButton6.setBackground(new java.awt.Color(51, 153, 0));
-        jButton6.setForeground(new java.awt.Color(255, 255, 255));
-        jButton6.setText("Add Stock");
-        jButton6.addActionListener(new java.awt.event.ActionListener() {
+        add_stock_btn.setBackground(new java.awt.Color(51, 153, 0));
+        add_stock_btn.setForeground(new java.awt.Color(255, 255, 255));
+        add_stock_btn.setText("Add Stock");
+        add_stock_btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                add_stock_btnMouseClicked(evt);
+            }
+        });
+        add_stock_btn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton6ActionPerformed(evt);
+                add_stock_btnActionPerformed(evt);
             }
         });
 
@@ -253,12 +272,12 @@ public class Stock extends javax.swing.JFrame {
                         .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField1)
-                    .addComponent(jTextField2)
-                    .addComponent(jTextField3)
+                    .addComponent(product_name_input)
+                    .addComponent(product_quantity_input)
+                    .addComponent(ppp_input)
                     .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton6)))
+                        .addGap(0, 484, Short.MAX_VALUE)
+                        .addComponent(add_stock_btn)))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -269,17 +288,17 @@ public class Stock extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(product_name_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(5, 5, 5)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(product_quantity_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
                 .addGap(5, 5, 5)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(ppp_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(10, 10, 10)
-                .addComponent(jButton6)
+                .addComponent(add_stock_btn)
                 .addGap(11, 11, 11))
         );
 
@@ -294,13 +313,11 @@ public class Stock extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 3, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 684, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -322,9 +339,67 @@ public class Stock extends javax.swing.JFrame {
 
         jPanel5.getAccessibleContext().setAccessibleName("Add Order");
 
-        setSize(new java.awt.Dimension(900, 548));
+        setSize(new java.awt.Dimension(913, 548));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    
+private void populateTable() {
+    try {
+        // Load JDBC driver and establish connection
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
+
+        // Query to get all products
+        String get_all_product = "SELECT * FROM product";
+        PreparedStatement get_product_ps = conn.prepareStatement(get_all_product);
+        ResultSet get_all_product_set = get_product_ps.executeQuery();
+        
+        // Get the current date
+        Date currentDate = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        DefaultTableModel tblModel = (DefaultTableModel) jTable1.getModel();
+        tblModel.setRowCount(0);
+        
+        while (get_all_product_set.next()) {
+            String id = get_all_product_set.getString("id");
+            String product_name = get_all_product_set.getString("product_name");
+            double price_per_unit = get_all_product_set.getDouble("price_per_unit");
+            String stock_quantity = get_all_product_set.getString("stock_quantity");
+            
+            // Default values
+            double discounted_price = price_per_unit;
+            String formatted_price_per_unit = String.format("%.2f", discounted_price);
+
+            String discountQuery = "SELECT discount_percent FROM sale WHERE product_id = ? AND ? BETWEEN start_date AND end_date";
+            PreparedStatement discount_ps = conn.prepareStatement(discountQuery);
+            discount_ps.setInt(1, Integer.parseInt(id));
+            discount_ps.setDate(2, new java.sql.Date(currentDate.getTime()));
+            ResultSet discount_rs = discount_ps.executeQuery();
+
+            if (discount_rs.next()) {
+                double discount_percent = discount_rs.getDouble("discount_percent");
+                discounted_price = price_per_unit * (1 - discount_percent / 100);
+                formatted_price_per_unit = String.format("%.2f", discounted_price);
+            }
+
+            String[] tdData = {id, product_name, formatted_price_per_unit, stock_quantity};
+            tblModel.addRow(tdData);
+
+            discount_rs.close();
+            discount_ps.close();
+        }
+
+        get_all_product_set.close();
+        get_product_ps.close();
+        conn.close();
+
+    } catch (ClassNotFoundException | SQLException e) {
+        e.printStackTrace();
+    }
+}
+
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
@@ -347,10 +422,11 @@ public class Stock extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        this.toBack();
-        Profile newframe = new Profile();
+//        this.toBack();
+        Profile_new newframe = new Profile_new(this.userId);
         newframe.setVisible(true);
-        newframe.toFront();
+//        newframe.toFront();
+        this.dispose();
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton5MouseClicked
@@ -362,35 +438,63 @@ public class Stock extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton5MouseClicked
 
-    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+    private void add_stock_btnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_stock_btnActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton6ActionPerformed
+    }//GEN-LAST:event_add_stock_btnActionPerformed
 
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+    private void ppp_inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ppp_inputActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField3ActionPerformed
+    }//GEN-LAST:event_ppp_inputActionPerformed
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+    private void product_quantity_inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_product_quantity_inputActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_product_quantity_inputActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void product_name_inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_product_name_inputActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_product_name_inputActionPerformed
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
         // TODO add your handling code here:
-        Sale newframe = new Sale();
+        Sale newframe = new Sale(this.userId);
         newframe.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton3MouseClicked
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
         // TODO add your handling code here:
-        Purchase newframe = new Purchase();
+        Dashboard newframe = new Dashboard(this.userId);
         newframe.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton2MouseClicked
+
+    private void add_stock_btnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_stock_btnMouseClicked
+         try {
+            String product_name = product_name_input.getText();
+            String product_quantity = product_quantity_input.getText();             
+            String ppp = ppp_input.getText();
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
+            
+            String productQuery = "INSERT INTO product (product_name,price_per_unit,stock_quantity) VALUES (?,?,?)";
+            PreparedStatement insert_stock = conn.prepareStatement(productQuery);
+            insert_stock.setString(1,product_name );
+            insert_stock.setString(2,ppp );
+            insert_stock.setString(3,product_quantity );
+
+            int insert_product = insert_stock.executeUpdate();
+            if (insert_product > 0) {
+                JOptionPane.showMessageDialog(null, "Stock added successfully!", "Stock Added", JOptionPane.INFORMATION_MESSAGE); 
+                populateTable();
+            } else {
+                JOptionPane.showMessageDialog(null, "Error orccured!", "Error Occured", JOptionPane.ERROR_MESSAGE);
+            }
+            insert_stock.close();
+            conn.close();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }    }//GEN-LAST:event_add_stock_btnMouseClicked
 
     /**
      * @param args the command line arguments
@@ -425,18 +529,18 @@ public class Stock extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Stock().setVisible(true);
+                new Stock(0).setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton add_stock_btn;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
     private javax.swing.JDialog jDialog1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -449,8 +553,8 @@ public class Stock extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField ppp_input;
+    private javax.swing.JTextField product_name_input;
+    private javax.swing.JTextField product_quantity_input;
     // End of variables declaration//GEN-END:variables
 }

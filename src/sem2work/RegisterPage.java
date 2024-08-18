@@ -114,6 +114,7 @@ public class RegisterPage extends javax.swing.JFrame {
         });
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jLabel8.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jLabel8.setText("        Welcome To GROC-GO!");
@@ -188,7 +189,7 @@ public class RegisterPage extends javax.swing.JFrame {
                                 .addComponent(Pword, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(Cword, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(92, Short.MAX_VALUE))))
+                        .addContainerGap(88, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -225,7 +226,7 @@ public class RegisterPage extends javax.swing.JFrame {
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 50, 730, 410));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon("/Users/sanjeev/Desktop/Computing LED 2/background/background.jpg")); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/sem2work/assests/GROC-GO Background .jpg"))); // NOI18N
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 900, 520));
 
         setSize(new java.awt.Dimension(900, 549));
@@ -289,7 +290,7 @@ public class RegisterPage extends javax.swing.JFrame {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
-                String query = "INSERT INTO User (full_name, email ,phone_number, password) VALUES (?, ?, ?, ?)";
+                String query = "INSERT INTO user (full_name, email ,phone_number, password) VALUES (?, ?, ?, ?)";
                 PreparedStatement ps = conn.prepareStatement(query);
                 ps.setString(1, Fullname.getText());
                 ps.setString(2, Eword.getText());

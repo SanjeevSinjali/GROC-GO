@@ -5,8 +5,14 @@
 package sem2work;
 
 import java.awt.Color;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import sem2work.First;
+import javax.swing.table.*;
 
 /**
  *
@@ -17,9 +23,13 @@ public class Dashboard extends javax.swing.JFrame {
     /**
      * Creates new form HomePage
      */
+    private int userId;
     
-    public Dashboard() {
+    public Dashboard(int userid) {
+        this.userId = userid;
         initComponents();
+        populateTable();
+        populateComboBox();
     }
 
     /**
@@ -45,20 +55,19 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        qty = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jButton6 = new javax.swing.JButton();
+        add_order_btn = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
+        product_combobox = new javax.swing.JComboBox<>();
+        calc_total_btn = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
-        jButton7 = new javax.swing.JButton();
+        product_id = new javax.swing.JTextField();
+        remove_order_btn = new javax.swing.JButton();
 
         javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
         jDialog1.getContentPane().setLayout(jDialog1Layout);
@@ -75,10 +84,11 @@ public class Dashboard extends javax.swing.JFrame {
         setTitle("Dashboard");
         setResizable(false);
 
-        jPanel1.setBackground(new java.awt.Color(153, 153, 153));
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jLabel1.setFont(new java.awt.Font("MonoLisa Black", 0, 36)); // NOI18N
-        jLabel1.setText("GROC-GO");
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/sem2work/assests/GROC-GO Final Logo.jpg"))); // NOI18N
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jButton1.setText("Profile");
@@ -155,7 +165,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 8, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jLabel1))
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -185,7 +195,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 21, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -195,15 +205,14 @@ public class Dashboard extends javax.swing.JFrame {
         jTable1.setBorder(javax.swing.BorderFactory.createCompoundBorder());
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                { new Integer(1), "2pm noodle",  new Integer(20),  new Long(26),  new Long(500)},
-                { new Integer(2), "Banana",  new Integer(12),  new Long(10),  new Long(120)}
+
             },
             new String [] {
-                "Product Id", "Product Name", "Qty", "Price Per Unit", "Total Price"
+                "id", "product_name", "qty", "price_per_unit", "total_price"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.Long.class, java.lang.Long.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -218,91 +227,88 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel3.setText("Product Qty");
 
-        jLabel5.setText("Product Price Per Unit");
-
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        qty.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
-            }
-        });
-
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
-            }
-        });
-
-        jTextField3.setToolTipText("");
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
+                qtyActionPerformed(evt);
             }
         });
 
         jLabel6.setText("Total Amount");
 
-        jLabel7.setText("Rs 8000.");
+        jLabel7.setText("Rs: 0");
 
-        jButton6.setBackground(new java.awt.Color(51, 153, 0));
-        jButton6.setForeground(new java.awt.Color(255, 255, 255));
-        jButton6.setText("Add Order");
-        jButton6.addActionListener(new java.awt.event.ActionListener() {
+        add_order_btn.setBackground(new java.awt.Color(51, 153, 0));
+        add_order_btn.setForeground(new java.awt.Color(255, 255, 255));
+        add_order_btn.setText("Add Order");
+        add_order_btn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton6ActionPerformed(evt);
+                add_order_btnActionPerformed(evt);
             }
         });
 
         jLabel8.setFont(new java.awt.Font("MonoLisa", 1, 18)); // NOI18N
         jLabel8.setText("ADD ORDER");
 
+        product_combobox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        calc_total_btn.setBackground(new java.awt.Color(255, 102, 51));
+        calc_total_btn.setForeground(new java.awt.Color(255, 255, 255));
+        calc_total_btn.setText("Calc total");
+        calc_total_btn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                calc_total_btnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel6)
-                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel8)
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField1)
-                    .addComponent(jTextField2)
-                    .addComponent(jTextField3)
                     .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton6)))
+                        .addGap(25, 25, 25)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel8)
+                            .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(qty)
+                            .addComponent(product_combobox, 0, 128, Short.MAX_VALUE)
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(calc_total_btn)
+                        .addGap(18, 18, 18)
+                        .addComponent(add_order_btn)))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(16, Short.MAX_VALUE)
                 .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(product_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(5, 5, 5)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(qty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addGap(5, 5, 5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel6)
-                        .addComponent(jLabel7))
-                    .addComponent(jButton6))
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(add_order_btn)
+                    .addComponent(calc_total_btn))
                 .addGap(11, 11, 11))
         );
 
@@ -316,9 +322,14 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel10.setText("Product Id");
 
-        jButton7.setBackground(new java.awt.Color(255, 0, 0));
-        jButton7.setForeground(new java.awt.Color(255, 255, 255));
-        jButton7.setText("Remove");
+        remove_order_btn.setBackground(new java.awt.Color(255, 0, 0));
+        remove_order_btn.setForeground(new java.awt.Color(255, 255, 255));
+        remove_order_btn.setText("Remove");
+        remove_order_btn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                remove_order_btnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -327,15 +338,18 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(14, 14, 14)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton7)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(47, 47, 47)
-                        .addComponent(jTextField4))
+                        .addComponent(product_id, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE))
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(remove_order_btn)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -344,11 +358,11 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jLabel9)
                 .addGap(55, 55, 55)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(product_id, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton7)
-                .addContainerGap())
+                .addComponent(remove_order_btn)
+                .addGap(11, 11, 11))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -359,16 +373,14 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 3, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 684, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -387,14 +399,87 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(17, 17, 17))
+                .addGap(22, 22, 22))
         );
 
         jPanel5.getAccessibleContext().setAccessibleName("Add Order");
 
-        setSize(new java.awt.Dimension(900, 548));
+        setSize(new java.awt.Dimension(913, 548));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+private void populateTable() {
+    try {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
+
+        String get_all_purchase = "SELECT * FROM purchase_list";
+        PreparedStatement get_all_purchase_ps = conn.prepareStatement(get_all_purchase);
+        ResultSet get_all_purchase_result_set = get_all_purchase_ps.executeQuery();
+
+        DefaultTableModel tblModel = (DefaultTableModel) jTable1.getModel();
+        tblModel.setRowCount(0);
+        while (get_all_purchase_result_set.next()) {
+            String id = get_all_purchase_result_set.getString("id");
+            System.out.println("ID: " + id);  // Print ID
+
+            int product_id = get_all_purchase_result_set.getInt("product_id");
+            System.out.println("Product ID: " + product_id);
+
+            String get_product_name = "SELECT product_name FROM product WHERE id = ?";
+            PreparedStatement ps = conn.prepareStatement(get_product_name);
+            ps.setInt(1, product_id);
+            ResultSet get_product_id_result_set = ps.executeQuery();
+
+            String product_name = "";
+            if (get_product_id_result_set.next()) {
+                product_name = get_product_id_result_set.getString("product_name");
+            }
+            ps.close();
+
+            String qty = get_all_purchase_result_set.getString("qty");
+            System.out.println("Quantity: " + qty);  
+
+            String price_per_unit = String.format("%.2f", get_all_purchase_result_set.getDouble("price_per_unit"));
+            System.out.println("Price per unit: " + price_per_unit);
+
+            String total_price = String.format("%.2f", get_all_purchase_result_set.getDouble("total_price"));
+            System.out.println("Total price: " + total_price);
+
+            String[] tdData = {id, product_name, qty, price_per_unit, total_price};
+            tblModel.addRow(tdData);
+        }
+
+        get_all_purchase_result_set.close();
+        conn.close();
+
+    } catch (ClassNotFoundException | SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+    private void populateComboBox() {
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
+
+            String get_all_product_name = "SELECT product_name FROM product";
+            PreparedStatement ps = conn.prepareStatement(get_all_product_name);
+            ResultSet rs = ps.executeQuery();
+
+            product_combobox.removeAllItems();
+
+            while (rs.next()) {
+                String itemName = rs.getString("product_name");
+                product_combobox.addItem(itemName);
+            }
+
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error loading data from database");
+        }
+    }
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
@@ -417,10 +502,9 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        this.toBack();
-        Profile newframe = new Profile();
+        Profile_new newframe = new Profile_new(userId);
         newframe.setVisible(true);
-        newframe.toFront();
+        this.dispose();
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton5MouseClicked
@@ -432,21 +516,104 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton5MouseClicked
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void qtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_qtyActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_qtyActionPerformed
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    private void add_order_btnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_order_btnActionPerformed
 
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField3ActionPerformed
+        try {
+            String product_name = (String) product_combobox.getSelectedItem();
+            System.out.println(product_name);
+            int wanted_qty = Integer.parseInt(qty.getText());
 
-    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton6ActionPerformed
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
+
+            String productQuery = "SELECT * FROM product WHERE product_name = ?";
+            PreparedStatement get_product_id = conn.prepareStatement(productQuery);
+            get_product_id.setString(1, product_name);
+            ResultSet get_product_id_result_set = get_product_id.executeQuery();
+
+            if (get_product_id_result_set.next()) {
+                int product_id = get_product_id_result_set.getInt("id");
+                double pricePerUnit = get_product_id_result_set.getDouble("price_per_unit");
+                int stock_qty = get_product_id_result_set.getInt("stock_quantity");
+
+                if (wanted_qty > stock_qty) {
+                    JOptionPane.showMessageDialog(null, "Quantity not in stock!", "Error Occurred", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                String discountQuery = "SELECT discount_percent FROM sale WHERE product_id = ? AND ? BETWEEN start_date AND end_date";
+                PreparedStatement discount_ps = conn.prepareStatement(discountQuery);
+                discount_ps.setInt(1, product_id);
+                discount_ps.setDate(2, new java.sql.Date(new java.util.Date().getTime())); // Current date
+                ResultSet discount_rs = discount_ps.executeQuery();
+
+                if (discount_rs.next()) {
+                    double discount_percent = discount_rs.getDouble("discount_percent");
+                    pricePerUnit = pricePerUnit * (1 - discount_percent / 100); // Apply discount
+                }
+
+                String query = "INSERT INTO purchase_list (product_id, price_per_unit, qty, total_price) VALUES (?,?,?,?)";
+                PreparedStatement ps = conn.prepareStatement(query);
+                ps.setInt(1, product_id);
+                ps.setDouble(2, pricePerUnit);
+                ps.setInt(3, wanted_qty);
+                double p_total_price = pricePerUnit * wanted_qty;
+                ps.setDouble(4, p_total_price);
+
+                int resultSet = ps.executeUpdate();
+
+                if (resultSet > 0) {
+                    JOptionPane.showMessageDialog(null, "Order added successfully!", "Order Added", JOptionPane.INFORMATION_MESSAGE);
+                    DefaultTableModel tblModel = (DefaultTableModel) jTable1.getModel();
+                    tblModel.setRowCount(0);
+                    String get_all_purchase = "SELECT * FROM purchase_list";
+                    PreparedStatement get_all_purchase_ps = conn.prepareStatement(get_all_purchase);
+                    ResultSet get_all_purchase_result_set = get_all_purchase_ps.executeQuery();
+
+                    while (get_all_purchase_result_set.next()) {
+                        String id = get_all_purchase_result_set.getString("id");
+                        String qty = get_all_purchase_result_set.getString("qty");
+                        String price_per_unit = String.format("%.2f", get_all_purchase_result_set.getDouble("price_per_unit"));
+                        String total_price = String.format("%.2f", get_all_purchase_result_set.getDouble("total_price"));
+                        String[] tdData = {id, product_name, qty, price_per_unit, total_price};
+                        tblModel.addRow(tdData);
+                    }
+                    String update_stock = "UPDATE product SET stock_quantity = stock_quantity - ? WHERE id = ?";
+                    PreparedStatement update_stock_ps = conn.prepareStatement(update_stock);
+                    update_stock_ps.setInt(1, wanted_qty);
+                    update_stock_ps.setInt(2, product_id);
+                    int updated_response = update_stock_ps.executeUpdate();
+
+                    if (updated_response > 0) {
+                        System.out.println("Successfully updated stock qty");
+                    }
+
+                    get_all_purchase_result_set.close();
+                    get_all_purchase_ps.close();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error occurred!", "Error Occurred", JOptionPane.ERROR_MESSAGE);
+                }
+
+                discount_rs.close();
+                discount_ps.close();
+                get_product_id.close();
+                ps.close();
+                conn.close();
+
+            } else {
+                JOptionPane.showMessageDialog(null, "No product found with the given name!", "Error Occurred", JOptionPane.ERROR_MESSAGE);
+                System.out.println("No product found with the given name.");
+            }
+
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+    }//GEN-LAST:event_add_order_btnActionPerformed
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
         // TODO add your handling code here:
@@ -457,17 +624,121 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
         // TODO add your handling code here:
-        Sale newframe = new Sale();
+        Sale newframe = new Sale(this.userId);
         newframe.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton3MouseClicked
 
     private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
         // TODO add your handling code here:
-        Stock newframe = new Stock();
+        Stock newframe = new Stock(this.userId);
         newframe.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton4MouseClicked
+
+    private void remove_order_btnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_order_btnActionPerformed
+
+        String p_id = product_id.getText();
+        int qty_to_add = 0;
+        int product_id = 0;
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password")) {
+
+                String get_deleted_qty = "SELECT qty, product_id FROM purchase_list WHERE id = ?";
+                try (PreparedStatement qty_ps = conn.prepareStatement(get_deleted_qty)) {
+                    qty_ps.setString(1, p_id);
+                    try (ResultSet result = qty_ps.executeQuery()) {
+                        if (result.next()) {
+                            qty_to_add = result.getInt("qty");
+                            product_id = result.getInt("product_id");
+                        }
+                    }
+                }
+
+                String delete_query = "DELETE FROM purchase_list WHERE id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(delete_query)) {
+                    ps.setString(1, p_id);
+                    int rowsAffected = ps.executeUpdate();
+
+                    if (rowsAffected > 0) {
+                        JOptionPane.showMessageDialog(null, "Order removed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        populateTable();
+
+                        String stock_update_query = "UPDATE product SET stock_quantity = stock_quantity + ? WHERE id = ?";
+                        try (PreparedStatement update_ps = conn.prepareStatement(stock_update_query)) {
+                            update_ps.setInt(1, qty_to_add);
+                            update_ps.setInt(2, product_id);
+                            int result_response = update_ps.executeUpdate();
+
+                            if (result_response > 0) {
+                                System.out.println("Successfully updated stock qty");
+                            }
+                        }
+
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No such order found!", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
+            }
+
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "An error occurred while deleting the order!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+    }//GEN-LAST:event_remove_order_btnActionPerformed
+
+    private void calc_total_btnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_calc_total_btnActionPerformed
+
+        try {
+            String product_name = (String) product_combobox.getSelectedItem();
+            System.out.println(product_name);
+            int wanted_qty = Integer.parseInt(qty.getText());
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
+
+            String productQuery = "SELECT * FROM product WHERE product_name = ?";
+            PreparedStatement get_product_id = conn.prepareStatement(productQuery);
+            get_product_id.setString(1, product_name);
+            ResultSet get_product_id_result_set = get_product_id.executeQuery();
+
+            if (get_product_id_result_set.next()) {
+                double pricePerUnit = get_product_id_result_set.getDouble("price_per_unit");
+                int product_id = get_product_id_result_set.getInt("id");
+
+                // Check for discount in the sale table
+                String discountQuery = "SELECT discount_percent FROM sale WHERE product_id = ? AND CURDATE() BETWEEN start_date AND end_date";
+                PreparedStatement discount_ps = conn.prepareStatement(discountQuery);
+                discount_ps.setInt(1, product_id);
+                ResultSet discount_rs = discount_ps.executeQuery();
+
+                double after_discounted_price = pricePerUnit;
+                if (discount_rs.next()) {
+                    double discount_percent = discount_rs.getDouble("discount_percent");
+                    after_discounted_price = pricePerUnit * (1 - discount_percent / 100);
+                }
+
+                double p_total_price = after_discounted_price * wanted_qty;
+                jLabel7.setText(String.format("Rs: %.2f", p_total_price));
+
+                discount_rs.close();
+                discount_ps.close();
+            } else {
+                JOptionPane.showMessageDialog(null, "Error occurred!", "Error Occurred", JOptionPane.ERROR_MESSAGE);
+            }
+
+            get_product_id.close();
+            conn.close();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+    }//GEN-LAST:event_calc_total_btnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -500,26 +771,25 @@ public class Dashboard extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Dashboard().setVisible(true);
+                new Dashboard(0).setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton add_order_btn;
+    private javax.swing.JButton calc_total_btn;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
     private javax.swing.JDialog jDialog1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -530,9 +800,9 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
+    private javax.swing.JComboBox<String> product_combobox;
+    private javax.swing.JTextField product_id;
+    private javax.swing.JTextField qty;
+    private javax.swing.JButton remove_order_btn;
     // End of variables declaration//GEN-END:variables
 }

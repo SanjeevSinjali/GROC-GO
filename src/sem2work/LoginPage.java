@@ -143,6 +143,8 @@ public class LoginPage extends javax.swing.JFrame {
                 .addGap(159, 159, 159))
         );
 
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/sem2work/assests/GROC-GO Background .jpg"))); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -155,7 +157,7 @@ public class LoginPage extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
@@ -181,7 +183,7 @@ public class LoginPage extends javax.swing.JFrame {
          try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "root", "password");
-            String query = "SELECT * FROM User WHERE email = ? AND password = ?";
+            String query = "SELECT * FROM user WHERE email = ? AND password = ?";
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setString(1, Eword.getText());
             ps.setString(2, new String(enteredPassword));
@@ -191,7 +193,8 @@ public class LoginPage extends javax.swing.JFrame {
             if (resultSet.next()) {
                 // User credentials match
                 JOptionPane.showMessageDialog(null, "Login Successful!", "Login Info", JOptionPane.INFORMATION_MESSAGE);
-                Dashboard dashboard = new Dashboard();
+                int user_id = resultSet.getInt("id");
+                Dashboard dashboard = new Dashboard(user_id);
                 dashboard.setVisible(true);
                 this.dispose(); // Close the login page
                 
