@@ -10,3 +10,4 @@ use db;
   
 4.  import tables
 5. test 
+6. Test user profile 
